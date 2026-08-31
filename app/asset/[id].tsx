@@ -1,6 +1,14 @@
 import { ActionGrid } from '@/src/components/actions';
 import { TransactionRow } from '@/src/components/transactions';
-import { ActionSheet, KeyValue, PageTitle, Screen, SectionHeader, StateView } from '@/src/components/ui';
+import {
+  ActionSheet,
+  KeyValue,
+  PageTitle,
+  Panel,
+  Screen,
+  SectionHeader,
+  StateView,
+} from '@/src/components/ui';
 import { formatMinor, formatUsd } from '@/src/domain/money';
 import { useWallet } from '@/src/state/wallet-context';
 import { useLocalSearchParams } from 'expo-router';
@@ -35,23 +43,32 @@ export default function Asset() {
         title={`${asset.name} · ${asset.symbol}`}
         subtitle={`${account?.name} / ${sub?.name} / ${wallet?.name}`}
       />
-      <KeyValue
-        label="Available balance"
-        value={balance ? formatMinor(balance.available, balancesHidden) : 'Unavailable'}
-      />
-      <KeyValue
-        label="Locked balance"
-        value={balance ? formatMinor(balance.locked, balancesHidden) : 'Unavailable'}
-      />
-      <KeyValue label="Estimated value" value={formatUsd(balance?.estimatedUsdMinor ?? 0n, balancesHidden)} />
-      {addresses.map((x) => (
-        <KeyValue key={x.id} label={`${x.network} receiving address`} value={x.address} />
-      ))}
+      <Panel>
+        <KeyValue
+          label="Available balance"
+          value={balance ? formatMinor(balance.available, balancesHidden) : 'Unavailable'}
+        />
+        <KeyValue
+          label="Locked balance"
+          value={balance ? formatMinor(balance.locked, balancesHidden) : 'Unavailable'}
+        />
+        <KeyValue
+          label="Estimated value"
+          value={formatUsd(balance?.estimatedUsdMinor ?? 0n, balancesHidden)}
+        />
+        {addresses.map((x) => (
+          <KeyValue key={x.id} label={`${x.network} receiving address`} value={x.address} />
+        ))}
+      </Panel>
       <SectionHeader title="Available actions" />
       <ActionGrid onAction={setAction} />
       <SectionHeader title="Related transactions" />
       {tx.length ? (
-        tx.map((x) => <TransactionRow key={x.id} transaction={x} asset={asset} />)
+        <Panel>
+          {tx.map((x) => (
+            <TransactionRow key={x.id} transaction={x} asset={asset} />
+          ))}
+        </Panel>
       ) : (
         <StateView empty="No transactions have been recorded for this Asset." />
       )}

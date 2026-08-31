@@ -1,4 +1,4 @@
-import { AssetMark, PageTitle, Row, Screen, StateView } from '@/src/components/ui';
+import { AssetMark, PageTitle, Panel, Row, Screen, SectionHeader, StateView } from '@/src/components/ui';
 import { formatUsd, subaccountEstimatedUsd, walletEstimatedUsd } from '@/src/domain/money';
 import { useWallet } from '@/src/state/wallet-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -30,18 +30,21 @@ export default function Sub() {
         eyebrow="Aggregated estimated value"
         title={formatUsd(subaccountEstimatedUsd(snapshot, sub.id), balancesHidden)}
       />
-      {snapshot.wallets
-        .filter((x) => x.subaccountId === sub.id)
-        .map((x) => (
-          <Row
-            key={x.id}
-            title={x.name}
-            subtitle={`${x.type} · ${x.assetIds.length} assets`}
-            value={formatUsd(walletEstimatedUsd(snapshot, x.id), balancesHidden)}
-            leading={<AssetMark symbol={x.type} />}
-            onPress={() => router.push(`/wallet/${x.id}`)}
-          />
-        ))}
+      <SectionHeader title="Wallets" />
+      <Panel>
+        {snapshot.wallets
+          .filter((x) => x.subaccountId === sub.id)
+          .map((x) => (
+            <Row
+              key={x.id}
+              title={x.name}
+              subtitle={`${x.type} · ${x.assetIds.length} assets`}
+              value={formatUsd(walletEstimatedUsd(snapshot, x.id), balancesHidden)}
+              leading={<AssetMark symbol={x.type} />}
+              onPress={() => router.push(`/wallet/${x.id}`)}
+            />
+          ))}
+      </Panel>
     </Screen>
   );
 }

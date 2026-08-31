@@ -16,6 +16,10 @@ The current delivery implements the application foundation, Wallet Home, the com
 - ESLint and Prettier
 - Android package: `com.accesslb.wallet`
 
+## Design system
+
+The application follows Wallet Design System v1.0. Inter is the product font, with a compact 20px title, 15px body, and 12px technical/address scale. The interface uses a dark financial canvas, `#1F2630` fields and panels, `#008CCA` primary controls, `#FF2116` errors, `#A5A6A8` supporting text, and white financial values. Shared tokens and components in `src/design` and `src/components` must be reused for all future modules.
+
 ## Project structure
 
 - `app/`: Expo Router routes and screens.

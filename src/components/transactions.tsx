@@ -10,7 +10,7 @@ export function TransactionRow({ transaction, asset }: { transaction: Transactio
       subtitle={new Date(transaction.occurredAt).toLocaleString()}
       value={formatMinor(transaction.amount)}
       leading={
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: 5 }}>
           <AssetMark symbol={asset?.symbol ?? '?'} />
           <Status value={transaction.status} />
         </View>

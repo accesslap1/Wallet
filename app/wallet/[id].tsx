@@ -1,4 +1,4 @@
-import { AssetMark, PageTitle, Row, Screen, StateView } from '@/src/components/ui';
+import { AssetMark, PageTitle, Panel, Row, Screen, SectionHeader, StateView } from '@/src/components/ui';
 import { formatUsd, walletEstimatedUsd } from '@/src/domain/money';
 import { useWallet } from '@/src/state/wallet-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -31,21 +31,24 @@ export default function Wallet() {
         eyebrow="Aggregated estimated value"
         title={formatUsd(walletEstimatedUsd(snapshot, w.id), balancesHidden)}
       />
-      {snapshot.assets
-        .filter((x) => x.walletId === w.id)
-        .map((x) => (
-          <Row
-            key={x.id}
-            title={x.name}
-            subtitle={`${x.symbol} · ${x.kind}`}
-            value={formatUsd(
-              snapshot.balances.find((b) => b.assetId === x.id)?.estimatedUsdMinor ?? 0n,
-              balancesHidden,
-            )}
-            leading={<AssetMark symbol={x.symbol} />}
-            onPress={() => router.push(`/asset/${x.id}`)}
-          />
-        ))}
+      <SectionHeader title="Assets" />
+      <Panel>
+        {snapshot.assets
+          .filter((x) => x.walletId === w.id)
+          .map((x) => (
+            <Row
+              key={x.id}
+              title={x.name}
+              subtitle={`${x.symbol} · ${x.kind}`}
+              value={formatUsd(
+                snapshot.balances.find((b) => b.assetId === x.id)?.estimatedUsdMinor ?? 0n,
+                balancesHidden,
+              )}
+              leading={<AssetMark symbol={x.symbol} />}
+              onPress={() => router.push(`/asset/${x.id}`)}
+            />
+          ))}
+      </Panel>
     </Screen>
   );
 }

@@ -1,4 +1,4 @@
-import { KeyValue, PageTitle, Screen, StateView, Status } from '@/src/components/ui';
+import { KeyValue, PageTitle, Panel, Screen, StateView, Status } from '@/src/components/ui';
 import { formatMinor } from '@/src/domain/money';
 import { useWallet } from '@/src/state/wallet-context';
 import { useLocalSearchParams } from 'expo-router';
@@ -30,15 +30,17 @@ export default function Transaction() {
       <View style={{ alignSelf: 'flex-start' }}>
         <Status value={t.status} />
       </View>
-      <KeyValue label="Transaction ID" value={t.id} />
-      <KeyValue label="Asset" value={`${a?.name ?? 'Unknown'} (${a?.symbol ?? '—'})`} />
-      <KeyValue label="Amount" value={formatMinor(t.amount)} />
-      <KeyValue label="Fee" value={formatMinor(t.fee)} />
-      <KeyValue label="Source" value={t.source} />
-      <KeyValue label="Destination" value={t.destination} />
-      {t.network && <KeyValue label="Network" value={t.network} />}{' '}
-      {t.reference && <KeyValue label="Reference" value={t.reference} />}{' '}
-      {t.statusReason && <KeyValue label="Status reason" value={t.statusReason} />}
+      <Panel>
+        <KeyValue label="Transaction ID" value={t.id} />
+        <KeyValue label="Asset" value={`${a?.name ?? 'Unknown'} (${a?.symbol ?? '—'})`} />
+        <KeyValue label="Amount" value={formatMinor(t.amount)} />
+        <KeyValue label="Fee" value={formatMinor(t.fee)} />
+        <KeyValue label="Source" value={t.source} />
+        <KeyValue label="Destination" value={t.destination} />
+        {t.network && <KeyValue label="Network" value={t.network} />}{' '}
+        {t.reference && <KeyValue label="Reference" value={t.reference} />}{' '}
+        {t.statusReason && <KeyValue label="Status reason" value={t.statusReason} />}
+      </Panel>
     </Screen>
   );
 }

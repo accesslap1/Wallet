@@ -1,5 +1,6 @@
 import { Link } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
+import { colors, typography } from '@/src/design/tokens';
 export default function NotFound() {
   return (
     <View style={s.root}>
@@ -11,7 +12,7 @@ export default function NotFound() {
   );
 }
 const s = StyleSheet.create({
-  root: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, backgroundColor: '#F4F5F0' },
-  title: { fontSize: 20, fontWeight: '800', color: '#111B2E' },
-  link: { fontWeight: '800', color: '#2C5D4B' },
+  root: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, backgroundColor: colors.canvas },
+  title: { ...typography.title, color: colors.white },
+  link: { ...typography.text, color: colors.blueBright },
 });

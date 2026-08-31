@@ -1,5 +1,6 @@
 import { TransactionRow } from '@/src/components/transactions';
-import { PageTitle, Screen, StateView } from '@/src/components/ui';
+import { PageTitle, Panel, Screen, StateView } from '@/src/components/ui';
+import { colors, radius, typography } from '@/src/design/tokens';
 import { TransactionStatus, TransactionType } from '@/src/domain/models';
 import { useWallet } from '@/src/state/wallet-context';
 import { useState } from 'react';
@@ -39,13 +40,15 @@ export default function Transactions() {
         ))}
       </ScrollView>
       {values.length ? (
-        values.map((t) => (
-          <TransactionRow
-            key={t.id}
-            transaction={t}
-            asset={snapshot.assets.find((a) => a.id === t.assetId)}
-          />
-        ))
+        <Panel>
+          {values.map((t) => (
+            <TransactionRow
+              key={t.id}
+              transaction={t}
+              asset={snapshot.assets.find((a) => a.id === t.assetId)}
+            />
+          ))}
+        </Panel>
       ) : (
         <StateView empty="No transactions match the selected filters." />
       )}
@@ -53,15 +56,15 @@ export default function Transactions() {
   );
 }
 const s = StyleSheet.create({
-  filters: { gap: 8 },
+  filters: { gap: 8, paddingRight: 18 },
   filter: {
     borderWidth: 1,
-    borderColor: '#CDD2C9',
-    borderRadius: 10,
+    borderColor: colors.border,
+    borderRadius: radius.small,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  selected: { backgroundColor: '#2C5D4B', borderColor: '#2C5D4B' },
-  text: { fontSize: 12, fontWeight: '700', textTransform: 'capitalize', color: '#687387' },
-  selectedText: { color: '#fff' },
+  selected: { backgroundColor: colors.blue, borderColor: colors.blueBright },
+  text: { ...typography.label, textTransform: 'capitalize', color: colors.grey },
+  selectedText: { color: colors.white },
 });
