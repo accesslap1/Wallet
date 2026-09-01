@@ -35,15 +35,11 @@ export function AuthBrand({ compact = false }: { compact?: boolean }) {
   return (
     <View style={[s.brand, compact && s.brandCompact]}>
       <View style={s.brandMark}>
-        <MaterialCommunityIcons
-          name="shield-lock-outline"
-          size={compact ? 22 : 32}
-          color={colors.blueBright}
-        />
+        <Text style={s.brandGlyph}>E</Text>
       </View>
       <View>
         <Text style={s.brandOverline}>EGETY</Text>
-        <Text style={[s.brandName, compact && s.brandNameCompact]}>Wallet Trust</Text>
+        <Text style={[s.brandName, compact && s.brandNameCompact]}>Wallet</Text>
       </View>
     </View>
   );
@@ -110,16 +106,26 @@ export function Field({
   trailing,
   ...props
 }: TextInputProps & { label: string; error?: string; trailing?: ReactNode }) {
+  const [focused, setFocused] = useState(false);
+  const { onFocus, onBlur, style, ...inputProps } = props;
   return (
     <View style={s.fieldBlock}>
       <Text style={s.fieldLabel}>{label}</Text>
-      <View style={[s.field, !!error && s.fieldError]}>
+      <View style={[s.field, focused && s.fieldFocused, !!error && s.fieldError]}>
         <TextInput
           placeholderTextColor={colors.grey}
           selectionColor={colors.blueBright}
           autoCapitalize="none"
-          style={s.input}
-          {...props}
+          style={[s.input, Platform.OS === 'web' && s.webInput, style]}
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          {...inputProps}
         />
         {trailing}
       </View>
@@ -199,20 +205,6 @@ export function SecondaryButton({
 
 export function ButtonRow({ children }: PropsWithChildren) {
   return <View style={s.buttonRow}>{children}</View>;
-}
-
-export function DevelopmentCode({ label, code }: { label: string; code: string }) {
-  return (
-    <View style={s.devCode}>
-      <MaterialCommunityIcons name="flask-outline" size={18} color={colors.warning} />
-      <View style={s.devCopy}>
-        <Text style={s.devLabel}>{label} development code</Text>
-        <Text selectable style={s.devValue}>
-          {code}
-        </Text>
-      </View>
-    </View>
-  );
 }
 
 export function CodeField({
@@ -397,7 +389,11 @@ const PATTERN_CENTERS = Array.from({ length: 9 }, (_, index) => ({
 }));
 
 export function AuthFooter() {
-  return <Text style={s.footer}>Protected by Egety Wallet Trust · Development environment</Text>;
+  return (
+    <Text style={s.footer}>
+      Powered by <Text style={s.footerBrand}>Egety™</Text> ©2026 All Rights Reserved
+    </Text>
+  );
 }
 
 const s = StyleSheet.create({
@@ -405,39 +401,49 @@ const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.canvas },
   screen: {
     width: '100%',
-    maxWidth: 520,
+    maxWidth: 480,
     alignSelf: 'center',
     padding: spacing.lg,
-    paddingBottom: 44,
-    gap: 18,
+    paddingBottom: 32,
+    gap: 16,
   },
-  brand: { alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 24 },
-  brandCompact: { flexDirection: 'row', justifyContent: 'flex-start', paddingVertical: 4 },
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 20,
+  },
+  brandCompact: { justifyContent: 'flex-start', paddingVertical: 2 },
   brandMark: {
-    width: 58,
-    height: 58,
+    width: 38,
+    height: 38,
     borderWidth: 1,
-    borderColor: colors.border,
-    transform: [{ rotate: '45deg' }],
+    borderColor: colors.blueBright,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  brandGlyph: { fontFamily: 'Inter_700Bold', fontSize: 21, color: colors.blueBright },
   brandOverline: { ...typography.label, color: colors.blueBright, letterSpacing: 2 },
-  brandName: { fontFamily: 'Inter_700Bold', fontSize: 25, color: colors.white },
-  brandNameCompact: { fontSize: 18 },
-  tabs: { flexDirection: 'row', borderBottomWidth: 1, borderColor: colors.divider },
+  brandName: { fontFamily: 'Inter_700Bold', fontSize: 20, color: colors.white },
+  brandNameCompact: { fontSize: 16 },
+  tabs: { flexDirection: 'row', gap: 12, justifyContent: 'center', marginVertical: 2 },
   tab: {
-    flex: 1,
-    paddingVertical: 13,
+    minWidth: 112,
+    minHeight: 46,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.blueBright,
+    borderRadius: radius.medium,
   },
-  tabActive: { borderBottomColor: colors.blueBright },
-  tabText: { ...typography.text, color: colors.grey },
-  tabTextActive: { fontFamily: 'Inter_700Bold', color: colors.white },
+  tabActive: { backgroundColor: colors.blueBright },
+  tabText: { fontFamily: 'Inter_600SemiBold', fontSize: 16, color: colors.white },
+  tabTextActive: { fontFamily: 'Inter_700Bold', color: colors.black },
   titleBlock: { gap: 5 },
-  title: { fontFamily: 'Inter_700Bold', fontSize: 26, lineHeight: 32, color: colors.white },
+  title: { fontFamily: 'Inter_700Bold', fontSize: 25, lineHeight: 31, color: colors.white },
   subtitle: { ...typography.text, color: colors.grey },
   progress: { flexDirection: 'row', paddingVertical: 6 },
   progressItem: { flex: 1, alignItems: 'center', gap: 5, position: 'relative' },
@@ -472,15 +478,17 @@ const s = StyleSheet.create({
     minHeight: 48,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: radius.small,
+    borderRadius: radius.medium,
     backgroundColor: colors.field,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
   },
+  fieldFocused: { borderWidth: 2, borderColor: colors.blueBright, paddingHorizontal: 11 },
   fieldError: { borderColor: colors.red },
   fieldVerified: { borderColor: colors.blueBright },
-  input: { flex: 1, ...typography.text, color: colors.white, paddingVertical: 11 },
+  input: { flex: 1, ...typography.text, color: colors.white, paddingVertical: 11, borderWidth: 0 },
+  webInput: { outlineStyle: 'none' } as never,
   error: { ...typography.label, color: colors.red },
   choice: {
     minHeight: 46,
@@ -525,19 +533,6 @@ const s = StyleSheet.create({
   disabled: { opacity: 0.35 },
   pressed: { opacity: 0.6 },
   buttonRow: { flexDirection: 'row', gap: 10 },
-  devCode: {
-    borderWidth: 1,
-    borderColor: colors.warning,
-    backgroundColor: 'rgba(244,183,64,0.08)',
-    padding: 12,
-    borderRadius: radius.small,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  devCopy: { flex: 1, gap: 2 },
-  devLabel: { ...typography.label, color: colors.warning },
-  devValue: { fontFamily: 'Inter_700Bold', fontSize: 17, letterSpacing: 3, color: colors.white },
   codeSection: { gap: 7 },
   codeTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   codeButton: { paddingVertical: 5, paddingHorizontal: 8 },
@@ -604,5 +599,6 @@ const s = StyleSheet.create({
   patternDotSelected: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.blueBright },
   patternOrder: { position: 'absolute', fontFamily: 'Inter_700Bold', fontSize: 10, color: colors.black },
   clearPattern: { alignSelf: 'center', padding: 8 },
-  footer: { ...typography.label, color: colors.grey, textAlign: 'center', marginTop: 8 },
+  footer: { ...typography.label, color: colors.grey, textAlign: 'center', marginTop: 12 },
+  footerBrand: { color: colors.blueBright },
 });

@@ -1,5 +1,4 @@
 import { colors, radius, typography } from '@/src/design/tokens';
-import { MOCK_CODES } from '@/src/features/auth/auth-models';
 import { mockAuthService } from '@/src/features/auth/mock-auth-service';
 import {
   AuthBrand,
@@ -8,7 +7,6 @@ import {
   AuthTitle,
   ButtonRow,
   CodeField,
-  DevelopmentCode,
   Field,
   PrimaryButton,
   SecondaryButton,
@@ -26,7 +24,7 @@ export default function ForgotEid() {
   const verified = mockAuthService.verifyCode('email', code);
   const submit = () => {
     if (!identifier.trim() || !verified)
-      return setMessage('Enter your registered credential and verify the development email code.');
+      return setMessage('Enter your registered credential and verify the email code.');
     // Never expose whether an identity exists. A real backend would send the email here.
     mockAuthService.hasRecoveryIdentity(identifier);
     setSent(true);
@@ -51,7 +49,6 @@ export default function ForgotEid() {
         verified={verified}
         onSend={() => undefined}
       />
-      <DevelopmentCode label="Email" code={MOCK_CODES.email} />
       {!!message && <Text style={s.message}>{message}</Text>}
       {sent && (
         <View style={s.notice}>
