@@ -14,11 +14,13 @@ import { colors, radius, typography } from '@/src/design/tokens';
 import { accountEstimatedUsd, formatUsd, totalEstimatedUsd } from '@/src/domain/money';
 import { useWallet } from '@/src/state/wallet-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAuth } from '@/src/features/auth/auth-context';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function Home() {
+  const { session, signOut } = useAuth();
   const { snapshot, loading, error, reload, balancesHidden, toggleBalances } = useWallet();
   const [action, setAction] = useState<string>();
   if (!snapshot)
@@ -44,13 +46,21 @@ export default function Home() {
           </View>
           <Text style={s.brandName}>Wallet</Text>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Notifications" style={s.headerButton}>
-          <MaterialCommunityIcons name="bell-outline" size={21} color={colors.white} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Sign out"
+          onPress={() => {
+            signOut();
+            router.replace('/');
+          }}
+          style={s.headerButton}
+        >
+          <MaterialCommunityIcons name="logout" size={21} color={colors.white} />
         </Pressable>
       </View>
       <PageTitle
         eyebrow="Wallet overview"
-        title={`Hello, ${snapshot.user.displayName.split(' ')[0]}`}
+        title={`Hello, ${session?.profile.firstName ?? snapshot.user.displayName.split(' ')[0]}`}
         subtitle="All your financial spaces, understood at a glance."
       />
       <View style={s.balance}>

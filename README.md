@@ -25,6 +25,7 @@ The application follows Wallet Design System v1.0. Inter is the product font, wi
 - `app/`: Expo Router routes and screens.
 - `src/domain/`: typed Wallet entities and monetary aggregation logic.
 - `src/data/`: replaceable service interface and isolated fictional mock implementation.
+- `src/features/auth/`: typed authentication state, isolated development service, validation, and shared security controls.
 - `src/state/`: asynchronous Wallet provider, loading/error states, and balance privacy state.
 - `src/components/`: reusable hierarchy rows, transaction presentation, action grid, and bottom sheet.
 - `src/design/`: shared color and spacing tokens.
@@ -68,9 +69,14 @@ The `Android APK` GitHub Actions workflow runs the same checks, builds the debug
 
 `src/data/mock-wallet-service.ts` contains clearly fictional development data. Screens depend on `WalletDataService`, so a backend implementation can replace the mock without rewriting presentation components. The current service is read-only and never represents mock actions as executed financial transactions.
 
+The authentication module also uses an isolated development service. It includes signup, email verification, password registration, PIN and pattern registration, layered sign-in verification, Forgot Password, and Forgot EID. Mock verification codes are displayed in the development UI so no real email, SMS, or authenticator delivery is implied.
+
+The browser session is deliberately kept in memory and clears on refresh. Before real users or funds are supported, authentication must move to an audited backend with server-side password hashing, attempt throttling, secure recovery delivery, device binding, platform secure storage, session rotation, revocation, and monitoring.
+
 ## Current limitations
 
-- No authentication, backend API, persistence, compliance, or transaction execution is connected.
+- Authentication is a complete UX simulation, not a production identity backend.
+- No backend API, persistent session, compliance integration, or transaction execution is connected.
 - Conversion values are fixed fictional development values rather than live rates.
 - Financial action modules and production signing credentials remain outside this delivery.
 - Account/Wallet creation and management are not included yet.
