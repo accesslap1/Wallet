@@ -29,12 +29,6 @@ export type AuthSession = {
   authenticatedAt: string;
 };
 
-export const MOCK_CODES: Record<VerificationChannel, string> = {
-  email: '471395',
-  sms: '268140',
-  authenticator: '903271',
-};
-
 export const passwordChecks = (value: string, confirmation = value) => ({
   capitals: (value.match(/[A-Z]/g) ?? []).length >= 2,
   lowercase: (value.match(/[a-z]/g) ?? []).length >= 2,
