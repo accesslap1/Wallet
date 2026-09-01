@@ -1,10 +1,5 @@
 import { colors, typography } from '@/src/design/tokens';
-import {
-  MOCK_CODES,
-  VerificationChannel,
-  isStrongPassword,
-  passwordChecks,
-} from '@/src/features/auth/auth-models';
+import { VerificationChannel, isStrongPassword, passwordChecks } from '@/src/features/auth/auth-models';
 import { mockAuthService } from '@/src/features/auth/mock-auth-service';
 import {
   AuthBrand,
@@ -13,7 +8,6 @@ import {
   AuthTitle,
   ButtonRow,
   CodeField,
-  DevelopmentCode,
   Field,
   PrimaryButton,
   SecondaryButton,
@@ -38,7 +32,7 @@ export default function ForgotPassword() {
   const verified = (channel: VerificationChannel) => mockAuthService.verifyCode(channel, codes[channel]);
   const change = () => {
     if (!identifier.trim() || !verified('email') || !verified('sms') || !verified('authenticator'))
-      return setMessage('Enter your identity and complete all development verification methods.');
+      return setMessage('Enter your identity and complete all verification methods.');
     if (!isStrongPassword(password, confirmation))
       return setMessage('The new password must meet every requirement.');
     // The same neutral response is shown whether or not an identity exists.
@@ -53,7 +47,7 @@ export default function ForgotPassword() {
           <MaterialCommunityIcons name="check-decagram-outline" size={72} color={colors.blueBright} />
           <AuthTitle
             title="Password changed successfully"
-            subtitle="If the provided identity matched a development profile, its password is now updated."
+            subtitle="If the provided identity matched a profile, its password is now updated."
           />
         </View>
         <PrimaryButton label="Return to sign in" onPress={() => router.replace('/signin')} />
@@ -88,7 +82,6 @@ export default function ForgotPassword() {
             verified={verified(channel)}
             onSend={() => undefined}
           />
-          <DevelopmentCode label={channel} code={MOCK_CODES[channel]} />
         </View>
       ))}
       <Field
