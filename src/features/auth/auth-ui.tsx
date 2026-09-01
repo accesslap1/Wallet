@@ -1,8 +1,9 @@
 import { colors, radius, spacing, typography } from '@/src/design/tokens';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { PropsWithChildren, ReactNode, useMemo, useState } from 'react';
+import { PropsWithChildren, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
+  PanResponder,
   Platform,
   Pressable,
   ScrollView,
@@ -326,26 +327,61 @@ export function PatternPad({
   title?: string;
 }) {
   const selected = useMemo(() => new Set(value), [value]);
+  const valueRef = useRef(value);
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    valueRef.current = value;
+    onChangeRef.current = onChange;
+  }, [value, onChange]);
+  const responder = useMemo(() => {
+    const selectAt = (x: number, y: number) => {
+      const index = PATTERN_CENTERS.findIndex((point) => Math.hypot(point.x - x, point.y - y) <= 38);
+      if (index >= 0 && !valueRef.current.includes(index)) {
+        const next = [...valueRef.current, index];
+        valueRef.current = next;
+        onChangeRef.current(next);
+      }
+    };
+    // Gesture callbacks run after render; refs keep the active sequence current across move events.
+    // eslint-disable-next-line react-hooks/refs
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (event) => {
+        valueRef.current = [];
+        onChangeRef.current([]);
+        selectAt(event.nativeEvent.locationX, event.nativeEvent.locationY);
+      },
+      onPanResponderMove: (event) => selectAt(event.nativeEvent.locationX, event.nativeEvent.locationY),
+    });
+  }, []);
+  const lines = value.slice(1).map((index, lineIndex) => {
+    const from = PATTERN_CENTERS[value[lineIndex] ?? 0];
+    const to = PATTERN_CENTERS[index];
+    if (!from || !to) return null;
+    const distance = Math.hypot(to.x - from.x, to.y - from.y);
+    const angle = Math.atan2(to.y - from.y, to.x - from.x);
+    return (
+      <View
+        key={`${value[lineIndex]}-${index}`}
+        style={[
+          s.patternLine,
+          { left: from.x, top: from.y, width: distance, transform: [{ rotate: `${angle}rad` }] },
+        ]}
+      />
+    );
+  });
   return (
     <View style={s.patternWrap}>
       <Text style={s.pinTitle}>{title}</Text>
-      <Text style={s.patternHint}>
-        Select at least 4 dots in sequence. Tap a selected dot again to reset.
-      </Text>
-      <View accessibilityLabel="Pattern grid" style={s.patternGrid}>
+      <Text style={s.patternHint}>Draw through at least 4 dots in one continuous gesture.</Text>
+      <View accessibilityLabel="Pattern grid" style={s.patternGrid} {...responder.panHandlers}>
+        {lines}
         {Array.from({ length: 9 }, (_, index) => (
-          <Pressable
-            key={index}
-            accessibilityLabel={`Pattern dot ${index + 1}`}
-            onPress={() => {
-              if (selected.has(index)) onChange([]);
-              else onChange([...value, index]);
-            }}
-            style={[s.patternCell, selected.has(index) && s.patternCellSelected]}
-          >
+          <View key={index} style={[s.patternCell, selected.has(index) && s.patternCellSelected]}>
             <View style={[s.patternDot, selected.has(index) && s.patternDotSelected]} />
             {selected.has(index) && <Text style={s.patternOrder}>{value.indexOf(index) + 1}</Text>}
-          </Pressable>
+          </View>
         ))}
       </View>
       <Pressable onPress={() => onChange([])} style={s.clearPattern}>
@@ -354,6 +390,11 @@ export function PatternPad({
     </View>
   );
 }
+
+const PATTERN_CENTERS = Array.from({ length: 9 }, (_, index) => ({
+  x: 43 + (index % 3) * 104,
+  y: 55 + Math.floor(index / 3) * 104,
+}));
 
 export function AuthFooter() {
   return <Text style={s.footer}>Protected by Egety Wallet Trust · Development environment</Text>;
@@ -539,6 +580,14 @@ const s = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 18,
     paddingVertical: 12,
+    position: 'relative',
+  },
+  patternLine: {
+    position: 'absolute',
+    height: 3,
+    backgroundColor: colors.blueBright,
+    transformOrigin: 'left center',
+    zIndex: 1,
   },
   patternCell: {
     width: 86,
@@ -548,6 +597,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: colors.divider,
+    zIndex: 2,
   },
   patternCellSelected: { borderColor: colors.blueBright, backgroundColor: colors.blueSoft },
   patternDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.white },
