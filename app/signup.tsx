@@ -1,6 +1,5 @@
 import { colors, typography } from '@/src/design/tokens';
 import {
-  MOCK_CODES,
   SignUpDraft,
   isStrongPassword,
   isValidPattern,
@@ -17,7 +16,6 @@ import {
   ButtonRow,
   Choice,
   CodeField,
-  DevelopmentCode,
   Field,
   PatternPad,
   PinPad,
@@ -69,7 +67,7 @@ export default function SignUp() {
       setStep(1);
     } else if (step === 1) {
       if (!draft.country || !draft.dateOfBirth || !draft.email.includes('@') || !emailVerified)
-        return setMessage('Complete your contact details and verify the development email code.');
+        return setMessage('Complete your contact details and verify your email.');
       setStep(2);
     } else if (step === 2) {
       if (!isStrongPassword(draft.password, confirmation) || !terms)
@@ -116,7 +114,7 @@ export default function SignUp() {
         </View>
         <AuthTitle
           title="Congratulations, you’re in"
-          subtitle="Your Egety identity has been created for this development environment."
+          subtitle="Your Egety identity has been created successfully."
         />
         <View style={s.eidBox}>
           <Text style={s.eidLabel}>YOUR EGETY ID</Text>
@@ -179,7 +177,6 @@ export default function SignUp() {
             verified={emailVerified}
             onSend={() => undefined}
           />
-          <DevelopmentCode label="Email" code={MOCK_CODES.email} />
         </>
       )}
       {step === 2 && (
@@ -230,9 +227,7 @@ export default function SignUp() {
               size={22}
               color={terms ? colors.blueBright : colors.grey}
             />
-            <Text style={s.termsText}>
-              I accept the Terms & Conditions and Privacy Policy for this development environment.
-            </Text>
+            <Text style={s.termsText}>I accept the Terms & Conditions and Privacy Policy.</Text>
           </Pressable>
         </>
       )}
