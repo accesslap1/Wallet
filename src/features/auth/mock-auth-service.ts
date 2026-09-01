@@ -1,4 +1,4 @@
-import { AuthProfile, MOCK_CODES, SignUpDraft, VerificationChannel } from './auth-models';
+import { AuthProfile, SignUpDraft, VerificationChannel } from './auth-models';
 
 // Development-only one-way hash. Production credentials must be verified by an audited backend.
 export function hashSecret(value: string) {
@@ -13,6 +13,7 @@ export function hashSecret(value: string) {
 }
 
 type StoredUser = AuthProfile & {
+  identifierHashes: string[];
   passwordHash: string;
   pinHash: string;
   patternHash: string;
@@ -20,40 +21,48 @@ type StoredUser = AuthProfile & {
 
 const DEMO_PROFILE: AuthProfile = {
   id: 'profile-demo',
-  eid: 'EID-700841626',
-  firstName: 'Maya',
-  lastName: 'Nassar',
-  email: 'maya.nassar@wallet-demo.test',
-  phone: '+961 70 555 014',
-  username: 'mayanassar',
-  avatarInitials: 'MN',
+  eid: 'Authenticated profile',
+  firstName: 'Egety',
+  lastName: 'User',
+  email: '',
+  phone: '',
+  username: '',
+  avatarInitials: 'EU',
 };
 
 const users: StoredUser[] = [
   {
     ...DEMO_PROFILE,
-    passwordHash: hashSecret('Wallet#Demo!26'),
-    pinHash: hashSecret('4917'),
-    patternHash: hashSecret('0-1-4-7'),
+    identifierHashes: ['9b306782c008c360', 'fa2a699012a54826', '820f2517ba1a18c2', 'fc57128d66d626a2'],
+    passwordHash: 'f6a719d1d3f4a75c',
+    pinHash: 'cfef990e4e1b4302',
+    patternHash: '57d89804ac31b18d',
   },
 ];
 
 const normalize = (value: string) => value.trim().toLowerCase();
 const findUser = (identifier: string) => {
   const target = normalize(identifier);
-  return users.find(
-    (user) =>
-      normalize(user.eid) === target ||
-      normalize(user.email) === target ||
-      normalize(user.phone) === target ||
-      normalize(user.username) === target,
-  );
+  const targetHash = hashSecret(target);
+  return users.find((user) => user.identifierHashes.includes(targetHash));
+};
+
+const verificationHashes: Record<VerificationChannel, string> = {
+  email: '7bc11fae126bc123',
+  sms: '3470131245ebb673',
+  authenticator: 'de34ed6dd1faed14',
 };
 
 export class MockAuthService {
   listProfiles(): AuthProfile[] {
     return users.map(
-      ({ passwordHash: _password, pinHash: _pin, patternHash: _pattern, ...profile }) => profile,
+      ({
+        identifierHashes: _identifiers,
+        passwordHash: _password,
+        pinHash: _pin,
+        patternHash: _pattern,
+        ...profile
+      }) => profile,
     );
   }
 
@@ -63,7 +72,7 @@ export class MockAuthService {
   }
 
   verifyCode(channel: VerificationChannel, code: string) {
-    return MOCK_CODES[channel] === code.replace(/\s/g, '');
+    return verificationHashes[channel] === hashSecret(code.replace(/\s/g, ''));
   }
 
   verifyPin(profileId: string, pin: string) {
@@ -95,6 +104,9 @@ export class MockAuthService {
     };
     users.push({
       ...profile,
+      identifierHashes: [profile.eid, profile.email, profile.phone, profile.username]
+        .filter(Boolean)
+        .map((value) => hashSecret(normalize(value))),
       passwordHash: hashSecret(draft.password),
       pinHash: hashSecret(draft.pin),
       patternHash: hashSecret(draft.pattern.join('-')),
@@ -107,7 +119,13 @@ export class MockAuthService {
   }
 
   private publicProfile(user: StoredUser): AuthProfile {
-    const { passwordHash: _password, pinHash: _pin, patternHash: _pattern, ...profile } = user;
+    const {
+      identifierHashes: _identifiers,
+      passwordHash: _password,
+      pinHash: _pin,
+      patternHash: _pattern,
+      ...profile
+    } = user;
     return profile;
   }
 }
