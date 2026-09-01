@@ -1,6 +1,6 @@
-import { colors, radius, typography } from '@/src/design/tokens';
+import { colors, typography } from '@/src/design/tokens';
 import { useAuth } from '@/src/features/auth/auth-context';
-import { MOCK_CODES, VerificationChannel } from '@/src/features/auth/auth-models';
+import { VerificationChannel } from '@/src/features/auth/auth-models';
 import { mockAuthService } from '@/src/features/auth/mock-auth-service';
 import {
   AuthBrand,
@@ -10,7 +10,6 @@ import {
   AuthTitle,
   ButtonRow,
   CodeField,
-  DevelopmentCode,
   Field,
   PatternPad,
   PinPad,
@@ -25,7 +24,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 type Phase = 'credentials' | 'verification' | 'security';
 
 export default function SignIn() {
-  const { profiles, pendingProfile, setPendingProfile, completeSignIn } = useAuth();
+  const { pendingProfile, setPendingProfile, completeSignIn } = useAuth();
   const [phase, setPhase] = useState<Phase>('credentials');
   const [identifier, setIdentifier] = useState(pendingProfile?.email ?? '');
   const [password, setPassword] = useState('');
@@ -44,7 +43,7 @@ export default function SignIn() {
 
   const submitCredentials = () => {
     const match = mockAuthService.authenticateCredentials(identifier, password);
-    if (!match) return setMessage('The credentials do not match the development account.');
+    if (!match) return setMessage('The EID or password is incorrect.');
     setProfile(match);
     setPendingProfile(match);
     setMessage('');
@@ -52,7 +51,7 @@ export default function SignIn() {
   };
   const submitVerification = () => {
     if (!verified('email') || !verified('sms') || !verified('authenticator'))
-      return setMessage('Complete all three development verification methods.');
+      return setMessage('Complete all three verification methods.');
     setMessage('');
     setPhase('security');
   };
@@ -77,33 +76,6 @@ export default function SignIn() {
             title="Welcome back"
             subtitle="Enter your EID, username, email or phone number and password."
           />
-          {profiles.length > 0 && (
-            <View style={s.profileList}>
-              <Text style={s.smallTitle}>Profiles on this device</Text>
-              {profiles.map((item) => (
-                <Pressable
-                  key={item.id}
-                  onPress={() => {
-                    setIdentifier(item.email);
-                    setProfile(item);
-                    setPendingProfile(item);
-                  }}
-                  style={[s.profile, identifier === item.email && s.profileSelected]}
-                >
-                  <View style={s.avatar}>
-                    <Text style={s.avatarText}>{item.avatarInitials}</Text>
-                  </View>
-                  <View style={s.profileCopy}>
-                    <Text style={s.profileName}>
-                      {item.firstName} {item.lastName}
-                    </Text>
-                    <Text style={s.profileEid}>{item.eid}</Text>
-                  </View>
-                  <MaterialCommunityIcons name="chevron-right" size={20} color={colors.grey} />
-                </Pressable>
-              ))}
-            </View>
-          )}
           <Field
             label="EID / Username / Email / Phone"
             value={identifier}
@@ -142,7 +114,7 @@ export default function SignIn() {
         <>
           <AuthTitle
             title="Verify it’s you"
-            subtitle="This development flow demonstrates email, SMS/call and authenticator verification."
+            subtitle="Enter the codes sent to your registered verification methods."
           />
           {(['email', 'sms', 'authenticator'] as VerificationChannel[]).map((channel) => (
             <View key={channel} style={s.verification}>
@@ -159,7 +131,6 @@ export default function SignIn() {
                 verified={verified(channel)}
                 onSend={() => undefined}
               />
-              <DevelopmentCode label={channel} code={MOCK_CODES[channel]} />
               {channel === 'sms' && (
                 <Pressable style={s.call}>
                   <MaterialCommunityIcons name="phone-outline" size={16} color={colors.blueBright} />
@@ -186,7 +157,7 @@ export default function SignIn() {
             <PatternPad value={pattern} onChange={setPattern} />
           )}
           <View style={s.recovery}>
-            <Pressable onPress={() => setMessage('PIN recovery is not connected in this mock phase.')}>
+            <Pressable onPress={() => setMessage('Security recovery will be available soon.')}>
               <Text style={s.link}>Forgot {method === 'pin' ? 'PIN' : 'Pattern'}?</Text>
             </Pressable>
             <Pressable
@@ -212,41 +183,6 @@ export default function SignIn() {
 }
 
 const s = StyleSheet.create({
-  profileList: {
-    borderWidth: 1,
-    borderColor: colors.divider,
-    borderRadius: radius.medium,
-    overflow: 'hidden',
-  },
-  smallTitle: {
-    ...typography.label,
-    color: colors.blueBright,
-    padding: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  profile: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 64,
-    gap: 10,
-    padding: 10,
-    borderTopWidth: 1,
-    borderColor: colors.divider,
-  },
-  profileSelected: { backgroundColor: colors.blueSoft },
-  avatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: colors.blue,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { ...typography.label, color: colors.white },
-  profileCopy: { flex: 1, gap: 2 },
-  profileName: { fontFamily: 'Inter_600SemiBold', fontSize: 14, color: colors.white },
-  profileEid: { ...typography.address, color: colors.grey },
   recovery: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   link: { ...typography.label, color: colors.blueBright },
   remember: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
